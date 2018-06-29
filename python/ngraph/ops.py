@@ -422,29 +422,47 @@ Node.__ge__ = greater_eq
 @nameable_op
 def broadcast(node, new_shape, broadcast_axes, name=None):
     # type: (Node, TensorShape, Iterable[int], str) -> Node
-    """Return node which broadcasts input node values to specified shape.
+    """Create a node which broadcasts the input node's values along specified axes to a desired shape.
 
     :param node: The node with input tensor data.
     :param new_shape: The new shape we want to broadcast tensor to.
     :param broadcast_axes: The axis positions (0-based) in the result that are being broadcast.
     :param name: Optional new name for output node.
-    :return: New node with broadcasted shape.
+    :return: New node with broadcast shape.
     """
-    if type(broadcast_axes) is not set:
-        broadcast_axes = set(broadcast_axes)
+    # if type(broadcast_axes) is not set:
+    #     broadcast_axes = set(broadcast_axes)
     return Broadcast(node, Shape(new_shape), AxisSet(broadcast_axes))
 
 
 @nameable_op
 def broadcast_to(node, new_shape, axis=None, name=None):
     # type: (Node, TensorShape, int, str) -> Node
-    """Return node which broadcasts input node values to specified shape.
+    """Create a node which broadcasts the input node's values to a desired shape.
+
+    `broadcast_to` will attempt to automatically determine which axes need broadcasting.
+
+    The optional `axis` specifies the output axis along which to broadcast.
+
+    >>> input_node = ng.constant([1, 2, 3])
+    >>> new_shape = [3, 3]
+    >>> ng.broadcast_to(input_node, new_shape, axis=1)
+    array([[1, 2, 3],
+           [1, 2, 3],
+           [1, 2, 3]])
+
+    >>> input_node = ng.constant([1, 2, 3])
+    >>> new_shape = [3, 3]
+    >>> ng.broadcast_to(input_node, new_shape, axis=0)
+    array([[1, 1, 1],
+           [2, 2, 2],
+           [3, 3, 3]])
 
     :param node: The node with input tensor data.
     :param new_shape: The new shape we want to broadcast tensor to.
     :param axis: The axis along which we perform broadcasting.
     :param name: Optional new name for output node.
-    :return: New node with broadcasted shape.
+    :return: New node with broadcast shape.
     """
     return Broadcast(node, Shape(new_shape), get_broadcast_axes(new_shape, node.shape, axis))
 
